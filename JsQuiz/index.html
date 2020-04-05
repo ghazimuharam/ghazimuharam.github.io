@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="mb-5">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary py-4">
+            <a class="navbar-brand" href="#">Quiz App</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarColor01">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="https://ghazimuharam.github.io/">Muhammad Ghazi Muharam</span></a>
+                    </li>
+                    </ul>
+            </div>
+        </nav>
+    </div>
+
+    <div class="container col-lg-8">
+        <div class="card bg-light mb-3">
+            <div class="card-header">
+                <div class="d-flex">
+                    <div>
+                        Quiz
+                    </div>
+                    <div id="category" class="ml-auto">
+                        
+                     </div>
+                    <div id="type" class="ml-auto">
+                       
+                    </div>
+               </div>
+            </div>
+            <div class="card-body">
+
+                <form id="formQuiz" action="/" method="post">
+                    <div id="quiz">
+
+                    </div>
+                    <div class="sub">
+                        <button type="submit" id="submitQuiz" class="btn btn-primary mt-5" value="">Next</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="container">
+
+        <!-- Copyright -->
+        <div class="footer-copyright text-center py-3">© 2020 Copyright:
+            <a href="https://ghzmhrm.dev/"> Ghazi Muharam</a>
+            <style>.heart{color:#e25555;}</style>
+            Made with <span class="heart">❤</span> in Indonesia  
+        </div>
+        <!-- Copyright -->
+
+    </footer>
+
+    <script>
+        var datas = [];
+        var iteration = 0;
+        var forId = 0;
+        var correct_answer = [];
+        fetch('https://opentdb.com/api.php?amount=10&category=18&difficulty=medium&type=multiple')
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            pageBuilder(data);
+            datas = data.results;
+            datas.forEach(data => {
+                quizBuilder(data);
+            });
+        });
+
+        document.querySelector("#submitQuiz").addEventListener("click", function(event){
+            event.preventDefault()
+            submitQuiz();
+        });
+
+        function quizBuilder(data){
+            var option = [];
+            option.push(data.correct_answer);
+            correct_answer.push(data.correct_answer);
+            data.incorrect_answers.forEach(element => {
+                option.push(element);
+            });
+            shufOpt(option);
+            
+            var quiz = document.querySelector('#quiz');
+            
+            quiz.innerHTML += `<div class="row mt-5 mb-2 mx-2"><h5 class="card-text">${iteration+1} .${data.question}</h5>`;
+
+            option.forEach(element => {
+                quiz.innerHTML += `<div class="custom-control custom-radio">
+                                    <input type="radio" id="${forId}" name="customRadio${iteration+1}" value="${element}" class="custom-control-input">
+                                    <label class="custom-control-label" for="${forId}">${element}</label>
+                                </div></div>`
+                forId++;
+            });
+            iteration++;
+        }
+
+        function pageBuilder(data){
+            var category = document.querySelector('#category');
+            category.innerHTML = data.results[0].category;
+            var type = document.querySelector('#type');
+            type.innerHTML = 'Type: '+data.results[0].type;
+        }
+
+        function shufOpt(array){
+            for (let index = 0; index < array.length; index++) {
+                rand = Math.floor(Math.random() * 4);
+                const temp = array[index];
+                array[index] = array[rand];
+                array[rand] = temp;
+            }
+        }
+
+        function submitQuiz(){
+            var useransw = $("input[type='radio']");
+            useransw = useransw.filter(":checked");
+            if(useransw.length != 10){
+                alert("Quiz failed, please answer all question");
+                location.reload();
+            }else{
+                let nilai = 0;
+                for (let index = 0; index < useransw.length; index++) {
+                    if(correct_answer[index] == useransw[index].value){
+                        nilai+=10;
+                    }
+                }
+                console.log(nilai);
+                var quiz = document.querySelector('#quiz');
+                document.querySelector(".sub").innerHTML='';
+                quiz.innerHTML = `<div class="text-center">
+                            <h1>Quiz Selesai</h1>
+                            <h3>Score : ${nilai}</h3>
+                        </div>`;
+            }
+        }
+    </script>
+</body>
+</html>
